@@ -1,0 +1,121 @@
+#Author~ Graham
+#Sourced in part by Stack Overflow pygame button
+
+import pygame, sys, pymunk, math, time,sys
+from random import randint
+
+
+pygame.display.set_caption('Particals With Collisions')
+team = 30000
+
+
+class Ball():
+
+    def __init__(self, x, y, size):
+
+        self.size = size
+        mass = self.size**2
+        self.color = ("#ADD8E6")
+        angle = randint(0, 400)
+        coeff = team / mass
+        self.body = pymunk.Body(mass)
+        self.body.position = (x, y)
+        self.body.velocity = (coeff * math.cos(angle * math.pi / 180),
+                              coeff * math.sin(angle * math.pi / 180))
+        self.shape = pymunk.Circle(self.body, self.size)
+        self.shape.elasticity = 1
+        self.shape.density = 1
+        space.add(self.body, self.shape)
+
+    def draw1(self):
+        x = int(self.body.position.x)
+        y = int(self.body.position.y)
+
+        pygame.draw.circle(wn, self.color, (x, y), self.size)
+
+
+def create_segment(pos1, pos2):
+    segment_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    segment_shape = pymunk.Segment(segment_body, pos1, pos2, 30)
+    segment_shape.elasticity = 1
+    space.add(segment_body, segment_shape)
+
+
+pygame.init()
+wn = pygame.display.set_mode((600, 600))
+clock = pygame.time.Clock()
+space = pymunk.Space()
+
+num_of_balls = 200
+FPS = 50
+WHITE = 'white'
+BLACK = 'black'
+balls = [
+    Ball(randint(590, 590), randint(590, 590), randint(7, 7))
+    for i in range(num_of_balls)
+]
+
+pos_tl = (0, 0)
+pos_tr = (600, 0)
+pos_bl = (0, 600)
+pos_br = (600, 600)
+segment1 = create_segment(pos_tl, pos_tr)
+segment2 = create_segment(pos_tr, pos_br)
+segment3 = create_segment(pos_br, pos_bl)
+segment4 = create_segment(pos_bl, pos_tl)
+color_light = (170, 170, 170)
+color_dark = (0, 0, 0)
+font = pygame.font.SysFont("arial", 20)
+
+ball_text = font.render(f"Number Of Balls: {num_of_balls}", True,
+                        (255, 255, 255))
+slow = font.render('Slow Down', True, 'white')
+fast = font.render('Speed Up ', True, 'white')
+running = True
+
+while running:
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    wn.fill('black')
+    lr = [ball.draw1() for ball in balls]
+    pygame.draw.line(wn, BLACK, pos_tl, pos_tr, 30)
+    pygame.draw.line(wn, BLACK, pos_tr, pos_br, 30)
+    pygame.draw.line(wn, BLACK, pos_br, pos_bl, 30)
+    pygame.draw.line(wn, BLACK, pos_bl, pos_tl, 30)
+
+    great = 0
+
+    mouse = pygame.mouse.get_pos()
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        if 10 <= mouse[0] <= 100 and 40 <= mouse[1] <= 70:
+
+            FPS = 1500
+
+        elif 10 <= mouse[0] <= 120 and 70 <= mouse[1] <= 100:
+            FPS = 50
+
+    if 10 <= mouse[0] <= 100 and 40 <= mouse[1] <= 70:
+        pygame.draw.rect(wn, color_light, [10, 40, 120, 30])
+
+    else:
+        pygame.draw.rect(wn, color_dark, [10, 40, 100, 30])
+
+    if 10 <= mouse[0] <= 100 and 70 <= mouse[1] <= 100:
+        pygame.draw.rect(wn, color_light, [10, 70, 100, 30])
+
+    else:
+        pygame.draw.rect(wn, color_dark, [10, 70, 100, 30])
+
+    wn.blit(slow, (10, 40))
+    wn.blit(fast, (10, 70))
+    wn.blit(ball_text, (10, 10))
+
+    pygame.display.flip()
+    clock.tick(FPS)
+    space.step(1 / FPS)
+    pygame.display.update()
+
+pygame.quit()
